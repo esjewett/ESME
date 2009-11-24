@@ -65,14 +65,14 @@ object Api2Specs extends Specification with TestKit {
       }
     }
 
-	"Attempt to create session with an invalid token returns 400 response" in {
-      for{
-        session <- post("/api2/session", "token" -> "0000000")
-      } {                   
-		session.code must be equalTo(400)
-      }
-    }
-
+/*	"Attempt to create session with an invalid token returns 400 response" in {
+ *     for{
+ *       session <- post("/api2/session", "token" -> "0000000")
+ *     } {                   
+ *   	session.code must be equalTo(400)
+ *     }
+ *   }
+ */
     "/users" in {
       "Valid session" in {     
         "have a response code of 200" in {
