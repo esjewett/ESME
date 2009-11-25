@@ -56,35 +56,56 @@ object Api2Specs extends Specification with TestKit {
   }                
   
   "API2" should {
-	"Login with a valid token results in a 200 response and a proper response body" in {
-      for{
-        session <- post("/api2/session", "token" -> token)    
-      } {
-        (session.xml \ "session" \ "user" \ "id").text must be equalTo(theUser.id.toString)
-		session.code must be equalTo(200)
-      }
+	"/session POST" in {  
+	  "Attempt to log in with a valid token should succeed with a 200 response" in {
+	    for{
+	      session <- post("/api2/session", "token" -> token)    
+	    } {
+	      (session.xml \ "session" \ "user" \ "id").text must be equalTo(theUser.id.toString)
+		  session.code must be equalTo(200)
+	    } 
+	  }
+
+	  "Attempt to create session with an invalid token returns 400 response" in {
+	    for{
+	      session <- post("/api2/session", "token" -> "0000000")
+	    } {                   
+          session.code must be equalTo(401)
+	    } 
+	  }
+	}
+	
+	"/session GET" in {
+	  for {
+	    session <- post("/api2/session", "token" -> token)
+        session_response <- session.get("/api2/session")
+	  } {
+	    session_response.code must be equalTo(200)
+	    ( session_response.xml \ "session" \ "user" \ "id").text must be equalTo(theUser.id.toString)
+	  }  
     }
 
-	"Attempt to create session with an invalid token returns 400 response" in {
-      for{
-        session <- post("/api2/session", "token" -> "0000000")
-      } {                   
-		session.code must be equalTo(400)
-      }
-    }
+/*    "/session DELETE" in {
+ *     for {
+ *       session <- post("/api2/session", "token" -> token)
+ *       session_del_response <- session.delete("/api2/session")
+ *       session_response <- session.get("api2/session")
+ *     } {
+ *       session_del_response.code must be equalTo(200)
+ *       session_response.code must be equalTo(404)
+ *     }
+ *   }
+ */
 
-    "/users" in {
-      "Valid session" in {     
-        "have a response code of 200" in {
-          for {
-            session <- post("/api2/session", "token" -> token)
-            users <- session.get("/api2/users")
-          } {
-            users.code must be equalTo(200)
-          }
+    "/users GET" in {
+      "Valid session have a response code of 200" in {     
+        for {
+          session <- post("/api2/session", "token" -> token)
+          users <- session.get("/api2/users")
+        } {
+          users.code must be equalTo(200)
         }
-	  }                
-    }
-  }                                    
+      }
+    }                             
+  }  
 }
- 

@@ -56,15 +56,14 @@ object API2 extends ApiHelper with XmlHelper {
 	
     case Req("api2" :: "users" :: Nil, _, GetRequest) => allUsers
 // Add a method to get detail for a specific user
-
-// Document the fact that tag is no longer a parameter here                   
+                                                                          
     case Req("api2" :: "user" :: "messages" :: Nil, _, GetRequest)
  	  if S.param("timeout").isDefined => waitForMsgs
     case Req("api2" :: "user" :: "messages" :: Nil, _, GetRequest)
       if S.param("history").isDefined => allUserMsgs   
-    case Req("api2" :: "user" :: "messages" :: Nil, _, GetRequest) => getNewMsgs
-// Document the new method for getting messages belonging to a particular tag      
-    case Req("api2" :: "user" :: "messages" :: "tag" :: tag :: Nil, _, GetRequest)
+    case Req("api2" :: "user" :: "messages" :: Nil, _, GetRequest) => getNewMsgs  
+ 
+    case Req("api2" :: "user" :: "tags" :: tag :: "messages" :: Nil, _, GetRequest)
   		    => () => allUserMsgs(tag)
 // Possibly deprecate and move to api2/messages or api2/pools/poolName/messages
     case Req("api2" :: "user" :: "messages" :: Nil, _, PostRequest) => () => addMsg
