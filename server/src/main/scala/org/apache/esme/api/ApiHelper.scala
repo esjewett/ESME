@@ -67,21 +67,26 @@ trait ApiHelper {
     case Full(n) => buildResponse(true, Empty, n)  
     case Failure(msg, _, _) => buildResponse(false, Full(Text(msg)), Text(""))  
     case _ => buildResponse(false, Empty, Text(""))  
+  }
+
+  implicit def rackResponse(in: Box[Tuple3[Int,Map[String,String],Box[Elem]]]): LiftResponse = in match {
+    case Full((200,_,xml)) => buildResponse(true, Empty, xml openOr Text(""))
+    case Full((403,_,_)) => ForbiddenResponse()
+    case _ => InternalServerErrorResponse()   
   }  
   
   implicit def putResponseInBox(in: LiftResponse): Box[LiftResponse] = Full(in)
 
-  implicit def takeResponseOutOfBox(in: Box[LiftResponse]): LiftResponse =
-	in openOr false                                                   
-  
   /** 
    * The method that wraps the outer-most tag around the body 
-   */  
+   */   
+
   def createTag(in: NodeSeq): Elem  
   
   /** 
    * Build the Response based on the body 
    */  
+
   protected def buildResponse(success: Boolean, msg: Box[NodeSeq],  
                             body: NodeSeq): LiftResponse = {
     if(success) {

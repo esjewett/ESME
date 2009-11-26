@@ -117,16 +117,18 @@ object API2 extends ApiHelper with XmlHelper {
   }      
 
   def addSession(): LiftResponse = {
-    val r: Box[Elem] = if (User.loggedIn_?) Empty else
+    val r: Box[Tuple3[Int,Map[String,String],Box[Elem]]] = if (User.loggedIn_?) Empty else
     for{ token <- S.param("token")
          auth <- AuthToken.find(By(AuthToken.uniqueId, token))
          user <- auth.user.obj
-         session <- S.session
     } yield {
       User.logUserIn(user)
       val myActor = buildActor(user.id)
       restActor(Full(myActor))
-      <session>{userToXml(user)}</session>
+
+      val user_xml: Elem = <session>{userToXml(user)}</session>
+    
+      if(User.loggedIn_?) (200,Map(),Full(user_xml)) else (403,Map(),Empty)      
     }
 
     r

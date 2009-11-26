@@ -47,65 +47,93 @@ object Api2SpecsRunner extends ConsoleRunner(Api2Specs)
 object Api2Specs extends Specification with TestKit {
   JettyTestServer.start
 
-  val baseUrl = JettyTestServer.urlFor("")
+  val baseUrl = JettyTestServer.urlFor("/api2/")
   
   val theUser = User.createAndPopulate.nickname("api_test").saveMe
   val token = {
     val toke = AuthToken.create.user(theUser).saveMe
     toke.uniqueId.is
-  }                
+  }     
+
+  val post_session = post("session", "token" -> token)
   
   "API2" should {
 	"/session POST" in {  
 	  "Attempt to log in with a valid token should succeed with a 200 response" in {
 	    for{
-	      session <- post("/api2/session", "token" -> token)    
+	      session <- post_session    
 	    } {
 	      (session.xml \ "session" \ "user" \ "id").text must be equalTo(theUser.id.toString)
-		  session.code must be equalTo(200)
+		  session.code must be equalTo 200
 	    } 
 	  }
 
-	  "Attempt to create session with an invalid token returns 400 response" in {
+	  "Attempt to create session with an invalid token returns 403 response" in {
 	    for{
-	      session <- post("/api2/session", "token" -> "0000000")
-	    } {                   
-          session.code must be equalTo(401)
+	      session <- post_session
+	    } {                  
+          session.code must be equalTo 403
 	    } 
 	  }
 	}
 	
 	"/session GET" in {
 	  for {
-	    session <- post("/api2/session", "token" -> token)
-        session_response <- session.get("/api2/session")
+	    session <- post_session
+        session_response <- session.get("session")
 	  } {
-	    session_response.code must be equalTo(200)
+	    session_response.code must be equalTo 200
 	    ( session_response.xml \ "session" \ "user" \ "id").text must be equalTo(theUser.id.toString)
 	  }  
     }
 
-/*    "/session DELETE" in {
- *     for {
- *       session <- post("/api2/session", "token" -> token)
- *       session_del_response <- session.delete("/api2/session")
- *       session_response <- session.get("api2/session")
- *     } {
- *       session_del_response.code must be equalTo(200)
- *       session_response.code must be equalTo(404)
- *     }
- *   }
- */
+    "/session DELETE" in {
+      for {
+        session <- post_session
+        session_del_response <- session.delete("session")
+        //session_response <- session.get("session")
+      } {
+        session_del_response.code must be equalTo 200
+        //session_response.code must be equalTo(404)
+      }
+    }	
 
     "/users GET" in {
       "Valid session have a response code of 200" in {     
         for {
-          session <- post("/api2/session", "token" -> token)
-          users <- session.get("/api2/users")
+          session <- post_session
+          users <- session.get("users")
         } {
-          users.code must be equalTo(200)
+          users.code must be equalTo 200
         }
       }
-    }                             
+    }
+
+    "/user/messages GET" in {
+      for {
+        session <- post_session
+        mess_res <- session.get("user/messages")
+      } {
+        mess_res.code must be equalTo 200
+      }
+    }
+
+    "/user/messages?history=10 GET" in {
+      for {
+        session <- post_session
+        res <- session.get("user/messages?history=10")
+      } {
+        res.code must be equalTo 200
+      }
+    }
+
+    "/user/messages?timeout=2" in {
+      for {
+        sess <- post_session
+        res <- sess.get("user/messages?timeout=2")
+      } {
+        res.code must be equalTo 200
+      }
+    }                
   }  
 }
