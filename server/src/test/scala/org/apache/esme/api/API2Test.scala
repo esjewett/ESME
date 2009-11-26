@@ -70,7 +70,7 @@ object Api2Specs extends Specification with TestKit {
 
 	  "Attempt to create session with an invalid token returns 403 response" in {
 	    for{
-	      session <- post_session
+	      session <- post("session", "token" -> "000000")
 	    } {                  
           session.code must be equalTo 403
 	    } 
