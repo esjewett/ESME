@@ -180,6 +180,23 @@ object Api2Specs extends Specification with TestKit {
 	      session_res.code must be equalTo 403
 	    }
 	  }
+    } 
+
+    "/user/messages POST" in {
+      "with valid session" in {
+        for {
+          session <- post_session
+          mess_res <- session.post("user/messages","message"->"test message")
+        } {
+          mess_res.code must be equalTo 200
+        }
+      }
+
+	  "with no session returns 403 (forbidden)" in {
+	    for(session_res <- post("user/messages","message"->"test message")) {
+	      session_res.code must be equalTo 403
+	    }
+	  }
     }
 
     "/user/followees GET" in {
@@ -231,6 +248,213 @@ object Api2Specs extends Specification with TestKit {
 	      session_res.code must be equalTo 403
 	    }
 	  }
-    }              
+    }
+
+    "/user/tracks GET" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.get("user/tracks")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(session_res <- get("user/tracks")) {
+	      session_res.code must be equalTo 403
+	    }
+	  }
+    }
+
+    "/user/tracks POST" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.post("user/tracks","track" -> ".*")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(session_res <- post("user/tracks","track" -> ".*")) {
+	      session_res.code must be equalTo 403
+	    }
+	  }
+    }
+
+/*
+ *   "/user/tracks/TRACKID DELETE" in {
+ *     "with valid session" in {
+ *       for {
+ *         sess <- post_session
+ *         create_track <- sess.post("user/tracks","track"->".*")
+ *         res <- sess.delete("user/tracks/1")
+ *       } {
+ *         res.code must be equalTo 200
+ *       }          
+ *     }
+ *
+ *     "with no session returns 403 (forbidden)" in {
+ *       for(session_res <- delete("user/tracks/1")) {
+ *         session_res.code must be equalTo 403
+ *       }
+ *     }
+ *   } 
+ */
+
+    "/user/actions GET" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.get("user/actions")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(res <- get("user/actions")) {
+	      res.code must be equalTo 403
+	    }
+	  }
+    }
+
+    "/user/actions POST" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.post("user/actions",
+                           "name"->"Test action",
+                           "test"->"every 5 mins",
+                           "action"->"rss:http://blog.com/feed.rss")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(res <- post("user/actions",
+	                    "name"->"Test action",
+	                    "test"->"every 5 mins",
+	                    "action"->"rss:http://blog.com/feed.rss")) {
+	      res.code must be equalTo 403
+	    }
+	  }
+    }   
+
+/*
+ *    "/user/actions/ACTIONID PUT" in {
+ *     "with valid session" in {
+ *       for {
+ *         sess <- post_session
+ *         res <- sess.put("user/actions/1","enabled"->0)
+ *       } {
+ *         res.code must be equalTo 200
+ *       }          
+ *     }
+ *
+ *     "with no session returns 403 (forbidden)" in {
+ *       for(res <- post("user/actions/1","enabled"->0)) {
+ *         res.code must be equalTo 403
+ *       }
+ *     }
+ *   }
+ */
+
+/*
+ *   "/user/actions/ACTIONID DELETE" in {
+ *     "with valid session" in {
+ *       for {
+ *         sess <- post_session
+ *         res <- sess.delete("user/actions/1")
+ *       } {
+ *         res.code must be equalTo 200
+ *       }          
+ *     }
+ *
+ *     "with no session returns 403 (forbidden)" in {
+ *       for(res <- delete("user/actions/1")) {
+ *         res.code must be equalTo 403
+ *       }
+ *     }
+ *   } 
+ */
+
+    "conversations/CONVERSATIONID GET" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.get("conversations/1")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(res <- get("conversations/1")) {
+	      res.code must be equalTo 403
+	    }
+	  }
+    }
+
+    "/pools GET" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.get("pools")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(res <- get("pools")) {
+	      res.code must be equalTo 403
+	    }
+	  }
+    }
+
+    "/pools POST" in {
+      "with valid session" in {
+        for {
+          sess <- post_session
+          res <- sess.post("pools","poolName"->"test_pool")
+        } {
+          res.code must be equalTo 200
+        }          
+      }
+
+      "with no session returns 403 (forbidden)" in {
+	    for(res <- post("pools","poolName"->"test_pool")) {
+	      res.code must be equalTo 403
+	    }
+	  }
+    }  
+
+    "/pools/POOLID/users POST" in {
+
+/*
+ *     "with valid session" in {
+ *       for {
+ *         sess <- post_session
+ *         res <- sess.post("pools/1/users",{"realm"->"test_realm";
+ *                                                "userId"->1;
+ *                                                "permission"->"Write"})
+ *       } {
+ *         res.code must be equalTo 200
+ *       }          
+ *     }
+ */
+
+      "with no session returns 403 (forbidden)" in {
+	    for(res <- post("pools/1/users",{"realm"->"test_realm";
+                                                 "userId"->2;
+                                                 "permission"->"Write"})) {
+	      res.code must be equalTo 403
+	    }
+	  }
+    }        
   }  
 }
